@@ -416,7 +416,7 @@ function prso_theme_gform_get_name_field( $field, $value, $lead_id, $form_id ) {
 				$_value = $field_vals[$input_id];
 			}
 		?>
-		<div id="input_<?php esc_attr_e( $input_id ); ?>_container" class="<?php echo apply_filters( 'prso_theme_gforms_name_class', 'large-6 columns', $field, $form_id, $input ); ?>">
+		<div id="input_<?php esc_attr_e( $input_id ); ?>_container" class="<?php echo apply_filters( 'prso_theme_gforms_name_class', 'small-12 medium-6 columns', $field, $form_id, $input ); ?>">
 			<input id="input_<?php esc_attr_e( $input_id ); ?>" type="text" tabindex="" name="input_<?php esc_attr_e($input['id']); ?>" placeholder="<?php echo apply_filters( 'prso_theme_gforms_name_placeholder', $input['label'], $field, $form_id, $input ); ?>" class="<?php echo apply_filters( 'prso_theme_gforms_name_field_class', 'placeholder', $field, $form_id, $input ); ?>" value="<?php echo $_value; ?>" />
 		</div>
 		<?php endforeach; ?>
@@ -499,8 +499,16 @@ function prso_theme_gform_get_address_field( $field, $value, $lead_id, $form_id 
         $zip_value = esc_attr(rgget($field["id"] . ".5",$value));
         $country_value = esc_attr(rgget($field["id"] . ".6",$value));
     }
-
-    $address_types = GFCommon::get_address_types($form_id);
+	
+	//Add support for gf versions < 1.9
+	if( method_exists( 'GFCommon', 'get_address_types' ) ) {
+		$address_types = GFCommon::get_address_types($form_id);
+	} else {
+		$gf_address_field 	= GF_Fields::get( 'address' );
+		$address_types 		= $gf_address_field->get_address_types( $form_id );
+	}
+    
+    
     $addr_type = empty($field["addressType"]) ? "international" : $field["addressType"];
     $address_type = $address_types[$addr_type];
 
@@ -513,8 +521,14 @@ function prso_theme_gform_get_address_field( $field, $value, $lead_id, $form_id 
 
     if(empty($state_value))
         $state_value = rgget("defaultState", $field);
-
-    $country_list = GFCommon::get_country_dropdown($country_value);
+		
+	//Add support for gf versions < 1.9
+	if( method_exists( 'GFCommon', 'get_country_dropdown' ) ) {
+		$country_list = GFCommon::get_country_dropdown($country_value);
+	} else {
+		$gf_address_field 	= new GF_Field_Address();
+		$country_list       = $gf_address_field->get_country_dropdown( $country_value, '' );
+	}
 
     //changing css classes based on field format to ensure proper display
     $address_display_format = apply_filters("gform_address_display_format", "default");
@@ -635,7 +649,15 @@ function prso_theme_gform_get_state_field($field, $id, $field_id, $state_value, 
     }
 
     $address_type = rgempty("addressType", $field) ? "international" : $field["addressType"];
-    $address_types = GFCommon::get_address_types($form_id);
+    
+    //Add support for gf versions < 1.9
+	if( method_exists( 'GFCommon', 'get_address_types' ) ) {
+		$address_types = GFCommon::get_address_types($form_id);
+	} else {
+		$gf_address_field 	= GF_Fields::get( 'address' );
+		$address_types 		= $gf_address_field->get_address_types( $form_id );
+	}
+    
     $has_state_drop_down = isset($address_types[$address_type]["states"]) && is_array($address_types[$address_type]["states"]);
 
     if(IS_ADMIN && RG_CURRENT_VIEW != "entry"){
@@ -651,8 +673,18 @@ function prso_theme_gform_get_state_field($field, $id, $field_id, $state_value, 
     }
 
     $tabindex = GFCommon::get_tabindex();
+    
     $states = empty($address_types[$address_type]["states"]) ? array() : $address_types[$address_type]["states"];
-    $state_dropdown = sprintf("<select name='input_%d.4' %s $tabindex %s $state_dropdown_class $state_style>%s</select>", $id, $state_field_id, $disabled_text, GFCommon::get_state_dropdown($states, $state_value));
+    
+    //Add support for gf versions < 1.9
+	if( method_exists( 'GFCommon', 'get_state_dropdown' ) ) {
+		$get_state_dropdown = GFCommon::get_state_dropdown($states, $state_value);
+	} else {
+		$gf_address_field 		= new GF_Field_Address();
+		$get_state_dropdown     = $gf_address_field->get_state_dropdown( $states, $state_value, '' );
+	}
+    
+    $state_dropdown = sprintf("<select name='input_%d.4' %s $tabindex %s $state_dropdown_class $state_style>%s</select>", $id, $state_field_id, $disabled_text, $get_state_dropdown);
 
     $tabindex = GFCommon::get_tabindex();
     $state_text = sprintf("<input type='text' name='input_%d.4' %s value='%s' $tabindex %s $state_text_class $text_style placeholder='". apply_filters("gform_address_state_{$form_id}", apply_filters("gform_address_state", $state_label, $form_id), $form_id) ."'/>", $id, $state_field_id, $state_value, $disabled_text);
