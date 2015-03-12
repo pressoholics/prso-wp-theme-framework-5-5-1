@@ -31,7 +31,8 @@ class PrsoThemeConfig {
  * 13. Cufon font replacement
  * 14. Backstretch image background
  * 15. Waypoints script
- * 16. ACF Theme Options Page Setup
+ * 16. Skrollr Script
+ * 17. ACF Theme Options Page Setup
  *
  */
  
@@ -515,7 +516,7 @@ class PrsoThemeConfig {
 		);
  	*
 	*/
-	protected $theme_skrollr_script_args = array();
+	//protected $theme_skrollr_script_args = array();
 
 /******************************************************************
  * 17. 	ACF Theme Options Page Setup
