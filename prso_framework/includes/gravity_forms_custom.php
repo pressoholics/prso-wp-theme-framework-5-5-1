@@ -256,19 +256,22 @@ function prso_theme_gform_field_content( $content, $field, $value, $lead_id, $fo
 function prso_theme_gform_get_text_field( $field, $value, $lead_id, $form_id ) {
 	
 	//Init vars
+	$placeholder	= $field['label'];
 	$output = NULL;
 	
 	//Cache css id
 	$input_id = str_replace('.', '_', $field['id']);
 	
-	//prso_debug($field);
-	//exit();
+	//Cache placeholder
+	if( isset($field['placeholder']) && !empty($field['placeholder']) ) {
+		$placeholder = $field['placeholder'];
+	}
 	
 	ob_start();
 	?>
 	<div id="input_<?php esc_attr_e( $input_id ); ?>_container" class="<?php echo apply_filters( 'prso_theme_gforms_text_class', 'row collapse', $field, $form_id ); ?>">
 		<div class="<?php echo apply_filters( 'prso_theme_gforms_text_col_size', 'large-12', $field, $form_id ); ?> columns">
-			<input id="input_<?php esc_attr_e( $input_id ); ?>" type="text" placeholder="<?php echo apply_filters( 'prso_theme_gforms_text_placeholder', $field['label'], $field, $form_id ); ?>" tabindex="" name="input_<?php esc_attr_e($input_id); ?>" class="<?php echo apply_filters( 'prso_theme_gforms_text_field_class', 'placeholder', $field, $form_id ); ?>" value="<?php echo $value; ?>">
+			<input id="input_<?php esc_attr_e( $input_id ); ?>" type="text" placeholder="<?php echo apply_filters( 'prso_theme_gforms_text_placeholder', $placeholder, $field, $form_id ); ?>" tabindex="" name="input_<?php esc_attr_e($input_id); ?>" class="<?php echo apply_filters( 'prso_theme_gforms_text_field_class', 'placeholder', $field, $form_id ); ?>" value="<?php echo $value; ?>">
 		</div>
 	</div>
 	<?php
@@ -304,16 +307,22 @@ function prso_theme_gform_get_text_field( $field, $value, $lead_id, $form_id ) {
 function prso_theme_gform_get_email_field( $field, $value, $lead_id, $form_id ) {
 	
 	//Init vars
-	$output = NULL;
+	$placeholder	= $field['label'];
+	$output 		= NULL;
 	
 	//Cache css id
 	$input_id = str_replace('.', '_', $field['id']);
+	
+	//Cache placeholder
+	if( isset($field['placeholder']) && !empty($field['placeholder']) ) {
+		$placeholder = $field['placeholder'];
+	}
 	
 	ob_start();
 	?>
 	<div id="input_<?php esc_attr_e( $input_id ); ?>_container" class="<?php echo apply_filters( 'prso_theme_gforms_website_class', 'row collapse', $field, $form_id ); ?>">
 		<div class="<?php echo apply_filters( 'prso_theme_gforms_email_col_size', 'large-12', $field, $form_id ); ?> columns">
-			<input id="input_<?php esc_attr_e( $input_id ); ?>" type="text" placeholder="<?php echo apply_filters( 'prso_theme_gforms_website_placeholder', $field['label'], $field, $form_id ); ?>" tabindex="" name="input_<?php esc_attr_e($input_id); ?>" class="<?php echo apply_filters( 'prso_theme_gforms_website_field_class', 'placeholder', $field, $form_id ); ?>" value="<?php echo $value; ?>">
+			<input id="input_<?php esc_attr_e( $input_id ); ?>" type="text" placeholder="<?php echo apply_filters( 'prso_theme_gforms_website_placeholder', $placeholder, $field, $form_id ); ?>" tabindex="" name="input_<?php esc_attr_e($input_id); ?>" class="<?php echo apply_filters( 'prso_theme_gforms_website_field_class', 'placeholder', $field, $form_id ); ?>" value="<?php echo $value; ?>">
 		</div>
 	</div>
 	<?php

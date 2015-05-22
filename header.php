@@ -154,12 +154,12 @@
 					</div>
 					<!-- /Header Row !-->
 					
-					<!-- Body Container !-->
-					<div id="body-container">
-						
-						<!-- Mobile nav for deep (Teriary) pages if page has any !-->
-					<div class="row">
-						<div id="mobile-deep-nav-container" class="large-12 columns show-for-small show-for-medium-portrait">
-							<?php //do_action( 'prso_deep_mobile_nav' ); ?>
-						</div>
-					</div>
+						<!-- Body Container !-->
+						<div id="body-container">
+							
+							<!-- Mobile nav for deep (Teriary) pages if page has any !-->
+							<div class="row">
+								<div id="mobile-deep-nav-container" class="large-12 columns show-for-small show-for-medium-portrait">
+									<?php //do_action( 'prso_deep_mobile_nav' ); ?>
+								</div>
+							</div>

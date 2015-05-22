@@ -1,6 +1,9 @@
 				
 				</div>
 				<!-- /Body Container !-->
+			
+			<!-- /Main Container !-->
+			</div>
 				
 				<div id="footer-container">
 					<footer role="contentinfo" class="row">
@@ -35,10 +38,7 @@
 							
 					</footer> <!-- end footer -->
 				</div>
-			
-			<!-- /Main Container !-->
-			</div>
-			
+				
 				<!-- close the off-canvas menu -->
 				<a class="exit-off-canvas"></a>
 				
