@@ -95,7 +95,7 @@ class SocialHelper {
 					if( isset($args['permalink']) ) {
 						$url = $args['permalink'];
 					} else {
-						$url = get_permalink( $post->ID );
+						$url = wp_get_shortlink( $post->ID );
 					}
 					
 					$output = "http://www.facebook.com/sharer.php?u={$url}";
@@ -107,7 +107,7 @@ class SocialHelper {
 					if( isset($args['permalink']) ) {
 						$url = $args['permalink'];
 					} else {
-						$url = get_permalink( $post->ID );
+						$url = wp_get_shortlink( $post->ID );
 					}
 					
 					//Check for text
@@ -118,6 +118,32 @@ class SocialHelper {
 					}
 					
 					$output = "http://twitter.com/share?url={$url}&text={$text}";
+					
+					break;
+				case 'linkedin':
+				
+					//Check for permalink override
+					if( isset($args['permalink']) ) {
+						$url = $args['permalink'];
+					} else {
+						$url = wp_get_shortlink( $post->ID );
+					}
+					
+					//Check for text
+					if( isset($args['title']) ) {
+						$title = urlencode( $args['title'] );
+					} else {
+						$title = urlencode( get_the_title( $post->ID ) );
+					}
+					
+					//Check for excerpt
+					if( isset($args['excerpt']) ) {
+						$excerpt = urlencode( $args['excerpt'] );
+					} else {
+						$excerpt = urlencode( $post->post_excerpt );
+					}
+					
+					$output = "https://www.linkedin.com/shareArticle?mini=true&url={$url}&title={$title}&summary={$excerpt}";
 					
 					break;
 				case 'pinterest':
@@ -131,7 +157,7 @@ class SocialHelper {
 					if( isset($args['permalink']) ) {
 						$url = $args['permalink'];
 					} else {
-						$url = get_permalink( $post->ID );
+						$url = wp_get_shortlink( $post->ID );
 					}
 					
 					$output = "https://plus.google.com/share?url={$url}";
@@ -143,7 +169,7 @@ class SocialHelper {
 					if( isset($args['permalink']) ) {
 						$url = $args['permalink'];
 					} else {
-						$url = get_permalink( $post->ID );
+						$url = wp_get_shortlink( $post->ID );
 					}
 					
 					//Check for email body
