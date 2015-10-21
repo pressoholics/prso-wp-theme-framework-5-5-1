@@ -320,9 +320,13 @@ function prso_theme_gform_get_email_field( $field, $value, $lead_id, $form_id ) 
 	
 	ob_start();
 	?>
-	<div id="input_<?php esc_attr_e( $input_id ); ?>_container" class="<?php echo apply_filters( 'prso_theme_gforms_website_class', 'row collapse', $field, $form_id ); ?>">
+	<div id="input_<?php esc_attr_e( $input_id ); ?>_container" class="<?php echo apply_filters( 'prso_theme_gforms_email_class', 'row collapse', $field, $form_id ); ?>">
 		<div class="<?php echo apply_filters( 'prso_theme_gforms_email_col_size', 'large-12', $field, $form_id ); ?> columns">
-			<input id="input_<?php esc_attr_e( $input_id ); ?>" type="text" placeholder="<?php echo apply_filters( 'prso_theme_gforms_website_placeholder', $placeholder, $field, $form_id ); ?>" tabindex="" name="input_<?php esc_attr_e($input_id); ?>" class="<?php echo apply_filters( 'prso_theme_gforms_website_field_class', 'placeholder', $field, $form_id ); ?>" value="<?php echo $value; ?>">
+		
+			<input id="input_<?php esc_attr_e( $input_id ); ?>" type="text" placeholder="<?php echo apply_filters( 'prso_theme_gforms_email_placeholder', $placeholder, $field, $form_id ); ?>" tabindex="" name="input_<?php esc_attr_e($input_id); ?>" class="<?php echo apply_filters( 'prso_theme_gforms_email_field_class', 'placeholder', $field, $form_id ); ?>" value="<?php echo $value; ?>">
+			
+			<?php echo do_action( 'prso_theme_gforms_email_after_input', $field, $value, $lead_id, $form_id ); ?>
+			
 		</div>
 	</div>
 	<?php
@@ -415,20 +419,24 @@ function prso_theme_gform_get_name_field( $field, $value, $lead_id, $form_id ) {
 	ob_start();
 	?>
 	<div class="row">
-		<?php foreach( $field['inputs'] as $key => $input ):
-			//Cache css id
-			$input_id = str_replace('.', '_', $input['id']);
+		<?php 
+		foreach( $field['inputs'] as $key => $input ):
 			
-			$_value = NULL;
+			if( $input['label'] != 'Prefix' && $input['label'] != 'Middle' && $input['label'] != 'Suffix' ) :
 			
-			if( isset($field_vals[$input_id]) ) {
-				$_value = $field_vals[$input_id];
-			}
+				//Cache css id
+				$input_id = str_replace('.', '_', $input['id']);
+				
+				$_value = NULL;
+				
+				if( isset($field_vals[$input_id]) ) {
+					$_value = $field_vals[$input_id];
+				}
 		?>
-		<div id="input_<?php esc_attr_e( $input_id ); ?>_container" class="<?php echo apply_filters( 'prso_theme_gforms_name_class', 'small-12 medium-6 columns', $field, $form_id, $input ); ?>">
-			<input id="input_<?php esc_attr_e( $input_id ); ?>" type="text" tabindex="" name="input_<?php esc_attr_e($input['id']); ?>" placeholder="<?php echo apply_filters( 'prso_theme_gforms_name_placeholder', $input['label'], $field, $form_id, $input ); ?>" class="<?php echo apply_filters( 'prso_theme_gforms_name_field_class', 'placeholder', $field, $form_id, $input ); ?>" value="<?php echo $_value; ?>" />
-		</div>
-		<?php endforeach; ?>
+				<div id="input_<?php esc_attr_e( $input_id ); ?>_container" class="<?php echo apply_filters( 'prso_theme_gforms_name_class', 'small-12 medium-6 columns', $field, $form_id, $input ); ?>">
+					<input id="input_<?php esc_attr_e( $input_id ); ?>" type="text" tabindex="" name="input_<?php esc_attr_e($input['id']); ?>" placeholder="<?php echo apply_filters( 'prso_theme_gforms_name_placeholder', $input['label'], $field, $form_id, $input ); ?>" class="<?php echo apply_filters( 'prso_theme_gforms_name_field_class', 'placeholder', $field, $form_id, $input ); ?>" value="<?php echo $_value; ?>" />
+				</div>
+		<?php endif; endforeach; ?>
 	</div>
 	<?php
 	$output = ob_get_contents();
@@ -530,13 +538,13 @@ function prso_theme_gform_get_address_field( $field, $value, $lead_id, $form_id 
 
     if(empty($state_value))
         $state_value = rgget("defaultState", $field);
-		
+	
 	//Add support for gf versions < 1.9
 	if( method_exists( 'GFCommon', 'get_country_dropdown' ) ) {
 		$country_list = GFCommon::get_country_dropdown($country_value);
 	} else {
 		$gf_address_field 	= new GF_Field_Address();
-		$country_list       = $gf_address_field->get_country_dropdown( $country_value, '' );
+		$country_list       = $gf_address_field->get_country_dropdown( $country_value, _x( 'Please Select', 'text', PRSOTHEMEFRAMEWORK__DOMAIN ) );
 	}
 
     //changing css classes based on field format to ensure proper display
@@ -599,15 +607,29 @@ function prso_theme_gform_get_address_field( $field, $value, $lead_id, $form_id 
         $zip = sprintf("<span class='ginput_{$zip_location}$class_suffix' id='" . $field_id . "_5_container'><input type='text' name='input_%d.5' id='%s_5' value='%s' $tabindex %s placeholder='". apply_filters("gform_address_zip_{$form_id}", apply_filters("gform_address_zip", $zip_label, $form_id), $form_id) ."'/></span>", $id, $field_id, $zip_value, $disabled_text, $field_id);
 
     }
-
+	
     if(IS_ADMIN || !$hide_country){
+    
         $style = $hide_country ? "style='display:none;'" : "";
         $tabindex = GFCommon::get_tabindex();
-        $country = sprintf("<span class='ginput_{$country_location}$class_suffix' id='" . $field_id . "_6_container' $style><label for='%s_6' id='" . $field_id . "_6_label'>" . apply_filters("gform_address_country_{$form_id}", apply_filters("gform_address_country",__("Country", "gravityforms"), $form_id), $form_id) . "</label><select name='input_%d.6' id='%s_6' $tabindex %s>%s</select></span>", $id, $field_id, $disabled_text, $country_list, $field_id);
+        
+        $country = sprintf(
+	        "<span class='ginput_{$country_location}$class_suffix' id='" . $field_id . "_6_container' $style><label for='%s_6' id='" . $field_id . "_6_label'>" . 
+	        apply_filters(
+	        	"gform_address_country_{$form_id}", 
+				__("Country", "gravityforms"), 
+				$form_id
+			) . 
+			"</label><select name='input_%d.6' id='%s_6' $tabindex >{$country_list}</select></span>", 
+			$id, $field_id, $disabled_text, $country_list, $field_id
+        );
+
     }
     else{
         $country = sprintf("<input type='hidden' class='gform_hidden' name='input_%d.6' id='%s_6' value='%s'/>", $id, $field_id, $country_value);
     }
+    
+    
     
     //Wrap city in foundation divs
     $city = "<div class='". apply_filters( 'prso_theme_gforms_address_city_class', 'large-5 columns', $field, $form_id ) ."'>{$city}</div>";

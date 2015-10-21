@@ -56,6 +56,7 @@
  * 42. init_theme_options	-	Include theme options framework
  * 43. init_theme_textdomain	-	Loads the theme's translated strings
  * 44. oembed_zurb_video_wrapper	-	Wraps any youtube or vimeo video embeds in correct zurb foundation flex video wrappers
+ * 45. Chrome admin area bug fix -  fixes issue where admin area is messed up on chrome
  *
  */
 class PrsoThemeFunctions extends PrsoThemeAppController {
@@ -184,6 +185,9 @@ class PrsoThemeFunctions extends PrsoThemeAppController {
  		//Filter oembed and wrap youtube and vimeo videos in flex video wrappers
  		add_filter( 'oembed_result', array($this, 'oembed_zurb_video_wrapper'), 10, 3 );
  		
+ 		//Fix chrome admin area bug
+ 		add_action('admin_enqueue_scripts', array($this, 'chromefix_inline_css') );
+ 		
  	}
  	
  	/**
@@ -311,18 +315,24 @@ class PrsoThemeFunctions extends PrsoThemeAppController {
 			$image_src = $image_data;
 	 	}
 	 	
+	 	
+	 	
 	 	//Check wp retina plugin is installed
 	 	if( function_exists('wr2x_init') && !empty($image_src) ) {
-				
+	 	
+			$wp_uploads = wp_upload_dir();
+			
 			$img_pathinfo = wr2x_get_pathinfo_from_image_src( $image_src );
-			$filepath = trailingslashit( ABSPATH ) . $img_pathinfo;
+			$filepath = $wp_uploads['basedir'] . '/' . $img_pathinfo;
 			$potential_retina = wr2x_get_retina( $filepath );
+			
+			
 			
 			if ( $potential_retina != null ) {
 				
 				$retina_pathinfo = ltrim( str_replace( ABSPATH, "", $potential_retina ), '/' );
 				$retina_url = trailingslashit( get_site_url() ) . $retina_pathinfo;
-				$img_url = trailingslashit( get_site_url() ) . $img_pathinfo;
+				$img_url = $wp_uploads['baseurl'] . '/' . $img_pathinfo;
 				
 				$interchange = "'[{$img_url}, (default)], [{$retina_url}, (retina)]'";
 				
@@ -1182,7 +1192,7 @@ class PrsoThemeFunctions extends PrsoThemeAppController {
 	*/
 	public function add_class_the_tags($html){
 	    $postid = get_the_ID();
-	    $html = str_replace('<a','<a class="label success radius"',$html);
+	    $html = str_replace('<a','<a class="label radius"',$html);
 	    return $html;
 	}
 	
@@ -2071,5 +2081,12 @@ class PrsoThemeFunctions extends PrsoThemeAppController {
 		return $output;
 		
 	}
+	
+	//Fix chrome admin area bug
+	function chromefix_inline_css() { 
+	 	wp_add_inline_style( 'wp-admin', '#adminmenu { transform: translateZ(0); }' );
+	}
+	
+	
 	
 }
