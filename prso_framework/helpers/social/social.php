@@ -374,23 +374,22 @@ class SocialHelper {
 		return $content;	
 	}
 	
-	static function twitter_convert_urls( $status, $targetBlank = true, $linkMaxLen=250 ){
- 
+	static function twitter_convert_urls( $tweet, $targetBlank = true, $linkMaxLen=250 ){
+		
 		// The target
 		$target=$targetBlank ? " target=\"_blank\" " : "";
 		 
-		// convert link to url
-		$status = preg_replace("/((http:\/\/|https:\/\/)[^ )
-		]+)/e", "'<a href=\"$1\" title=\"$1\" $target >'. ((strlen('$1')>=$linkMaxLen ? substr('$1',0,$linkMaxLen).'...':'$1')).'</a>'", $status);
-		 
-		// convert @ to follow
-		$status = preg_replace("/(@([_a-z0-9\-]+))/i","<a href=\"http://twitter.com/$2\" title=\"Follow $2\" $target >$1</a>",$status);
-		 
-		// convert # to search
-		$status = preg_replace("/(#([_a-z0-9\-]+))/i","<a href=\"http://search.twitter.com/search?q=%23$2\" title=\"Search $1\" $target >$1</a>",$status);
-		 
+		//Convert urls to <a> links
+		$tweet = preg_replace("/([\w]+\:\/\/[\w-?&;#~=\.\/\@]+[\w\/])/", "<a {$target} href=\"$1\">$1</a>", $tweet);
+
+		//Convert hashtags to twitter searches in <a> links
+		$tweet = preg_replace("/#([A-Za-z0-9\/\.]*)/", "<a {$target} href=\"http://twitter.com/search?q=$1\">#$1</a>", $tweet);
+
+		//Convert attags to twitter profiles in &lt;a&gt; links
+		$tweet = preg_replace("/@([A-Za-z0-9\/\.]*)/", "<a {$target} href=\"http://www.twitter.com/$1\">@$1</a>", $tweet);
+		
 		// return the status
-		return $status;
+		return $tweet;
 		
 	}
 	
