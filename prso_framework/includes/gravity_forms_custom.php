@@ -198,10 +198,15 @@ function prso_theme_gform_field_content( $content, $field, $value, $lead_id, $fo
 	        //Field Description
 	        $description = '';
 	        
+	        //Filter label
+	        $required_div = apply_filters( 'prso_gforms_field_required', $required_div, $field );
+	        
 	        if($is_description_above)
 	            $field_content = sprintf("%s<label class='gfield_label' for='%s'>%s%s</label>%s{FIELD}%s", $admin_buttons, $target_input_id, esc_html($field_label), $required_div , $description, $validation_message);
 	        else
 	            $field_content = sprintf("%s<label class='gfield_label' for='%s'>%s%s</label>{FIELD}%s%s", $admin_buttons, $target_input_id, esc_html($field_label), $required_div , $description, $validation_message);
+			
+			//prso_debug($field['type']);
 			
 			//Detect if field type is text or address and call the required function to get field content
 			if( $field['type'] === 'address' ) {
@@ -223,10 +228,16 @@ function prso_theme_gform_field_content( $content, $field, $value, $lead_id, $fo
 			} elseif ( $field['type'] === 'text' ) {
 			
 				$content = str_replace("{FIELD}", prso_theme_gform_get_text_field($field, $value, 0, $form_id), $field_content);
-				
+			
+			} elseif ( ($field['type'] === 'post_custom_field') || ($field['type'] === 'password') || ($field['type'] === 'radio') || ($field['type'] === 'select') ) {
+
+				$content = $content;
+			
 			} else {
 				$content = str_replace("{FIELD}", GFCommon::get_field_input($field, $value, 0, $form_id), $field_content);
 			}
+		
+		
 		
 	}
 	
@@ -257,7 +268,8 @@ function prso_theme_gform_get_text_field( $field, $value, $lead_id, $form_id ) {
 	
 	//Init vars
 	$placeholder	= $field['label'];
-	$output = NULL;
+	$output 		= NULL;
+	$type 			= 'text';
 	
 	//Cache css id
 	$input_id = str_replace('.', '_', $field['id']);
@@ -267,11 +279,16 @@ function prso_theme_gform_get_text_field( $field, $value, $lead_id, $form_id ) {
 		$placeholder = $field['placeholder'];
 	}
 	
+	//Is this a password field?
+	if( TRUE === $field->enablePasswordInput ) {
+		$type = 'password';
+	}
+	
 	ob_start();
 	?>
 	<div id="input_<?php esc_attr_e( $input_id ); ?>_container" class="<?php echo apply_filters( 'prso_theme_gforms_text_class', 'row collapse', $field, $form_id ); ?>">
 		<div class="<?php echo apply_filters( 'prso_theme_gforms_text_col_size', 'large-12', $field, $form_id ); ?> columns">
-			<input id="input_<?php esc_attr_e( $input_id ); ?>" type="text" placeholder="<?php echo apply_filters( 'prso_theme_gforms_text_placeholder', $placeholder, $field, $form_id ); ?>" tabindex="" name="input_<?php esc_attr_e($input_id); ?>" class="<?php echo apply_filters( 'prso_theme_gforms_text_field_class', 'placeholder', $field, $form_id ); ?>" value="<?php echo $value; ?>">
+			<input id="input_<?php esc_attr_e( $input_id ); ?>" type="<?php echo $type; ?>" placeholder="<?php echo apply_filters( 'prso_theme_gforms_text_placeholder', $placeholder, $field, $form_id ); ?>" tabindex="" name="input_<?php esc_attr_e($input_id); ?>" class="<?php echo apply_filters( 'prso_theme_gforms_text_field_class', 'placeholder', $field, $form_id ); ?>" value="<?php echo $value; ?>">
 		</div>
 	</div>
 	<?php
@@ -428,13 +445,20 @@ function prso_theme_gform_get_name_field( $field, $value, $lead_id, $form_id ) {
 				$input_id = str_replace('.', '_', $input['id']);
 				
 				$_value = NULL;
-				
+
+				$label = sanitize_text_field( $input['label'] );
+
+				//Cache custom lable
+                if( isset($input['customLabel']) && !empty($input['customLabel']) ) {
+                    $label = sanitize_text_field( $input['customLabel'] );
+                }
+
 				if( isset($field_vals[$input_id]) ) {
 					$_value = $field_vals[$input_id];
 				}
 		?>
 				<div id="input_<?php esc_attr_e( $input_id ); ?>_container" class="<?php echo apply_filters( 'prso_theme_gforms_name_class', 'small-12 medium-6 columns', $field, $form_id, $input ); ?>">
-					<input id="input_<?php esc_attr_e( $input_id ); ?>" type="text" tabindex="" name="input_<?php esc_attr_e($input['id']); ?>" placeholder="<?php echo apply_filters( 'prso_theme_gforms_name_placeholder', $input['label'], $field, $form_id, $input ); ?>" class="<?php echo apply_filters( 'prso_theme_gforms_name_field_class', 'placeholder', $field, $form_id, $input ); ?>" value="<?php echo $_value; ?>" />
+					<input id="input_<?php esc_attr_e( $input_id ); ?>" type="text" tabindex="" name="input_<?php esc_attr_e($input['id']); ?>" placeholder="<?php echo apply_filters( 'prso_theme_gforms_name_placeholder', $label, $field, $form_id, $input ); ?>" class="<?php echo apply_filters( 'prso_theme_gforms_name_field_class', 'placeholder', $field, $form_id, $input ); ?>" value="<?php echo $_value; ?>" />
 				</div>
 		<?php endif; endforeach; ?>
 	</div>
@@ -753,7 +777,7 @@ function prso_theme_gform_get_state_field($field, $id, $field_id, $state_value, 
 * @access 	public
 * @author	Ben Moody
 */
-add_filter("gform_field_choices", "prso_theme_gform_field_choices", 10, 2);
+//add_filter("gform_field_choices", "prso_theme_gform_field_choices", 10, 2);
 function prso_theme_gform_field_choices( $choices, $field ) {
 	
 	//Init vars
